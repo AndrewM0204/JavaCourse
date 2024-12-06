@@ -30,5 +30,7 @@ public class course21 {
         int a = 120;
         byte c1 = (byte)(a + 10);
         System.out.printf("%d", c1);
+        // 8
+        var d = a2 + a1;
     }
 }
