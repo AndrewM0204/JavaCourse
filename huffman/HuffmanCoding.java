@@ -106,10 +106,37 @@ public class HuffmanCoding {
         return newArray;
     }
 
+    public static void writeMap(Map<Character, String> map, ObjectOutputStream oos) throws IOException {
+        oos.writeInt(map.size());
+        for (Map.Entry<Character, String> entry : map.entrySet()) {
+            oos.writeChar(entry.getKey());
+            String code = entry.getValue();
+            oos.writeInt(code.length());
+            oos.writeChars(code);
+        }
+    }
+
+    // Function to read a Map from an ObjectInputStream
+    public static Map<Character, String> readMap(ObjectInputStream ois) throws IOException {
+        int size = ois.readInt();
+        Map<Character, String> map = new HashMap<>(size);
+        for (int i = 0; i < size; i++) {
+            char key = ois.readChar();
+            int code_size = ois.readInt();
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int j = 0; j < code_size; j++) {
+                stringBuilder.append(ois.readChar());
+            }
+            map.put(key, stringBuilder.toString());
+        }
+        return map;
+    }
+
     // Запись кодированного файла
     public static void writeEncodedFile(String filename, String encodedData, Map<Character, String> huffmanCodes) throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
-            oos.writeObject(huffmanCodes);  // Записываем словарь кодов
+            //oos.writeObject(huffmanCodes);  // Записываем словарь кодов
+            writeMap(huffmanCodes, oos);
             byte[] bval = new BigInteger(encodedData, 2).toByteArray();
             while(8*bval.length < encodedData.length()) {
                 bval = add2BeginningOfArray(bval, (byte)0);
@@ -122,7 +149,8 @@ public class HuffmanCoding {
     // Чтение из кодированного файла
     public static Object[] readEncodedFile(String filename) throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
-            Map<Character, String> huffmanCodes = (Map<Character, String>) ois.readObject();
+            //Map<Character, String> huffmanCodes = (Map<Character, String>) ois.readObject();
+            Map<Character, String> huffmanCodes = readMap(ois);
             int step = ois.readInt();
             byte[] encodedData = ois.readAllBytes();
             StringBuilder encodedString = new StringBuilder();
